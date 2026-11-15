@@ -5,6 +5,10 @@ VALID_BASES = set("ATGC")
 
 def validate_dna_sequence(sequence):
 
+    # Check input type
+    if not isinstance(sequence, str):
+        return False, "DNA sequence must be a string."
+
     # Convert to uppercase and remove spaces
     sequence = "".join(sequence.split()).upper()
 
@@ -16,7 +20,8 @@ def validate_dna_sequence(sequence):
     invalid_bases = set(sequence) - VALID_BASES
 
     if invalid_bases:
-        return False, f"Invalid DNA bases found: {invalid_bases}"
+        invalid = ", ".join(sorted(invalid_bases))
+        return False, f"Invalid DNA bases found: {invalid}"
 
     return True, "Valid DNA sequence."
 
@@ -28,7 +33,10 @@ if __name__ == "__main__":
         "ATGCGTAC",
         "ATGXGTAC",
         "ATGCATGC",
-        ""
+        "",
+        "atgc",
+        "ATG C G T",
+        123
     ]
 
     for dna in test_sequences:
