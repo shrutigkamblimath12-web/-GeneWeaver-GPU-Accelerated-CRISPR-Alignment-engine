@@ -1,16 +1,13 @@
-# GeneWeaver - Advanced DNA Sequence Alignment Engine
+# GeneWeaver - Pure Python DNA Alignment Engine
 
-from Bio.Align import PairwiseAligner
 from src.sequence_validator import validate_dna_sequence
 
 
 def perform_alignment(sequence1, sequence2):
 
-    # Normalize DNA sequences
     sequence1 = "".join(sequence1.split()).upper()
     sequence2 = "".join(sequence2.split()).upper()
 
-    # Validate both sequences
     valid1, message1 = validate_dna_sequence(sequence1)
     valid2, message2 = validate_dna_sequence(sequence2)
 
@@ -20,45 +17,78 @@ def perform_alignment(sequence1, sequence2):
     if not valid2:
         raise ValueError(f"Sequence 2: {message2}")
 
-    # Configure the alignment algorithm
-    aligner = PairwiseAligner()
+    match_score = 2
+    mismatch_score = -1
+    gap_penalty = -2
 
-    # Global alignment
-    aligner.mode = "global"
+    m = len(sequence1)
+    n = len(sequence2)
 
-    # Alignment scoring
-    aligner.match_score = 2
-    aligner.mismatch_score = -1
-    aligner.open_gap_score = -2
-    aligner.extend_gap_score = -0.5
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
 
-    # Perform alignment
-    alignments = aligner.align(sequence1, sequence2)
+    for i in range(1, m + 1):
+        dp[i][0] = i * gap_penalty
 
-    if len(alignments) == 0:
-        raise ValueError("No alignment found.")
+    for j in range(1, n + 1):
+        dp[0][j] = j * gap_penalty
 
-    # Select the best alignment
-    best_alignment = alignments[0]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
 
-    return best_alignment
+            diagonal = dp[i-1][j-1] + (
+                match_score if sequence1[i-1] == sequence2[j-1]
+                else mismatch_score
+            )
 
+            up = dp[i-1][j] + gap_penalty
+            left = dp[i][j-1] + gap_penalty
 
-# Test the alignment engine
-if __name__ == "__main__":
+            dp[i][j] = max(diagonal, up, left)
 
-    seq1 = "ATGCGTAC"
-    seq2 = "ATGACGTAC"
+    aligned1 = ""
+    aligned2 = ""
 
-    result = perform_alignment(seq1, seq2)
+    i, j = m, n
 
-    print("\nGENEWEAVER ADVANCED DNA ALIGNMENT")
-    print("---------------------------------")
+    while i > 0 or j > 0:
 
-    print("Sequence 1:", seq1)
-    print("Sequence 2:", seq2)
+        if i > 0 and j > 0:
+            score = match_score if sequence1[i-1] == sequence2[j-1] else mismatch_score
 
-    print("\nAlignment Result:")
-    print(result)
+            if dp[i][j] == dp[i-1][j-1] + score:
+                aligned1 = sequence1[i-1] + aligned1
+                aligned2 = sequence2[j-1] + aligned2
+                i -= 1
+                j -= 1
+                continue
 
-    print("Alignment Score:", result.score)
+        if i > 0 and dp[i][j] == dp[i-1][j] + gap_penalty:
+            aligned1 = sequence1[i-1] + aligned1
+            aligned2 = "-" + aligned2
+            i -= 1
+
+        else:
+            aligned1 = "-" + aligned1
+            aligned2 = sequence2[j-1] + aligned2
+            j -= 1
+
+    matches = sum(
+        a == b and a != "-"
+        for a, b in zip(aligned1, aligned2)
+    )
+
+    mismatches = sum(
+        a != b and a != "-" and b != "-"
+        for a, b in zip(aligned1, aligned2)
+    )
+
+    gaps = aligned1.count("-") + aligned2.count("-")
+
+    return {
+        "aligned_sequence1": aligned1,
+        "aligned_sequence2": aligned2,
+        "score": dp[m][n],
+        "matches": matches,
+        "mismatches": mismatches,
+        "gaps": gaps
+    }
