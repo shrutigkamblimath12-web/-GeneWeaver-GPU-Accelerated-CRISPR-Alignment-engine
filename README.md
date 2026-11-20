@@ -42,3 +42,10 @@ Day 1:
 - Integrate GPU acceleration.
 - Perform testing and performance analysis.
 -
+## Development Progress
+
+The GeneWeaver application includes DNA sequence validation
+and sequence alignment functionality.
+
+Development and testing are being carried out to improve
+the reliability and usability of the application.
