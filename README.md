@@ -49,3 +49,7 @@ and sequence alignment functionality.
 
 Development and testing are being carried out to improve
 the reliability and usability of the application.
+## Development Progress - 21 November 2026
+- Reviewed the DNA sequence validation module and existing unit tests.
+- Reviewed the current validation test coverage.
+- Continued development of the GeneWeaver sequence validation component.
