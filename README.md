@@ -53,3 +53,5 @@ the reliability and usability of the application.
 - Reviewed the DNA sequence validation module and existing unit tests.
 - Reviewed the current validation test coverage.
 - Continued development of the GeneWeaver sequence validation component.
+### DNA Sequence Alignment
+GeneWeaver allows users to compare two DNA sequences using global alignment.
