@@ -216,11 +216,233 @@ elif page == "Sequence Visualization":
 # Mutation Analysis
 elif page == "Mutation Analysis":
 
-    st.header("DNA Mutation Analysis")
-    st.info("Reference and mutated sequence comparison will be added here.")
+    st.header("🧬 DNA Mutation Analysis")
+
+    st.write(
+        "Compare a reference DNA sequence with a mutated "
+        "sequence to identify substitutions, insertions and deletions."
+    )
+
+    reference = st.text_area(
+        "Reference DNA Sequence",
+        "ATGCGTAC",
+        key="mutation_reference"
+    )
+
+    mutated = st.text_area(
+        "Mutated DNA Sequence",
+        "ATGAGTAC",
+        key="mutation_mutated"
+    )
+
+    if st.button("Analyze Mutations"):
+
+        ref = "".join(reference.upper().split())
+        mut = "".join(mutated.upper().split())
+
+        if not ref or not mut:
+            st.warning("Please enter both DNA sequences.")
+
+        elif any(base not in "ATGC" for base in ref + mut):
+            st.error("Invalid DNA sequence. Use only A, T, G and C.")
+
+        else:
+            try:
+                alignment = perform_alignment(ref, mut)
+
+                aligned_ref = alignment["aligned_sequence1"]
+                aligned_mut = alignment["aligned_sequence2"]
+
+                substitutions = 0
+                insertions = 0
+                deletions = 0
+                mutation_data = []
+
+                for i, (a, b) in enumerate(
+                    zip(aligned_ref, aligned_mut), start=1
+                ):
+
+                    if a == b:
+                        continue
+
+                    if a == "-":
+                        insertions += 1
+                        change = "Insertion"
+
+                    elif b == "-":
+                        deletions += 1
+                        change = "Deletion"
+
+                    else:
+                        substitutions += 1
+                        change = "Substitution"
+
+                    mutation_data.append({
+                        "Alignment Position": i,
+                        "Reference": a,
+                        "Mutated": b,
+                        "Mutation Type": change
+                    })
+
+                st.success("Mutation analysis completed!")
+
+                col1, col2, col3 = st.columns(3)
+
+                col1.metric("Substitutions", substitutions)
+                col2.metric("Insertions", insertions)
+                col3.metric("Deletions", deletions)
+
+                st.metric(
+                    "Total Mutations",
+                    substitutions + insertions + deletions
+                )
+
+                st.subheader("Mutation Comparison")
+
+                st.write("Reference Sequence:")
+                st.code(aligned_ref)
+
+                st.write("Mutated Sequence:")
+                st.code(aligned_mut)
+
+                st.subheader("Detected Mutations")
+
+                if mutation_data:
+                    df = pd.DataFrame(mutation_data)
+                    st.dataframe(df, use_container_width=True)
+                else:
+                    st.info("No mutations detected. Both sequences match.")
+
+            except Exception as error:
+                st.error(f"Mutation analysis error: {error}")
 
 # Chromosome Explorer
 elif page == "Chromosome Explorer":
 
-    st.header("Chromosome Explorer")
-    st.info("Chromosome visualization will be added here.")
+    st.header("🧬 Interactive Chromosome Explorer")
+
+    st.write(
+        "Explore DNA sequence regions and analyze their "
+        "nucleotide composition and GC content."
+    )
+
+    chromosome = st.selectbox(
+        "Select Chromosome",
+        [f"Chromosome {i}" for i in range(1, 23)] + [
+            "Chromosome X", "Chromosome Y"
+        ]
+    )
+
+    sequence = st.text_area(
+        "Enter DNA Sequence",
+        "ATGCGTACGTAGCTAGATCGATCGGCTAATGC",
+        key="chromosome_sequence"
+    )
+
+    dna = "".join(sequence.upper().split())
+
+    if st.button("Explore Chromosome"):
+
+        if not dna:
+            st.warning("Please enter a DNA sequence.")
+
+        elif any(base not in "ATGC" for base in dna):
+            st.error("Invalid DNA sequence. Use only A, T, G and C.")
+
+        else:
+            st.success(f"Exploring {chromosome}!")
+
+            col1, col2, col3 = st.columns(3)
+
+            col1.metric("Sequence Length", len(dna))
+            col2.metric("A + T", dna.count("A") + dna.count("T"))
+            col3.metric("G + C", dna.count("G") + dna.count("C"))
+
+            st.subheader("Chromosome Sequence Overview")
+
+            st.write(
+                f"Selected region: 1 to {len(dna)}"
+            )
+
+            st.progress(
+                1.0,
+                text="DNA sequence loaded successfully"
+            )
+
+            st.subheader("GC Content Analysis")
+
+            window_size = st.selectbox(
+                "Select Analysis Window Size",
+                [4, 8, 10, 16],
+                index=1,
+                key="chromosome_window"
+            )
+
+            if len(dna) < window_size:
+                st.warning(
+                    "DNA sequence is shorter than the selected window."
+                )
+
+            else:
+                positions = []
+                gc_values = []
+
+                for start in range(
+                    0, len(dna) - window_size + 1, window_size
+                ):
+                    window = dna[start:start + window_size]
+
+                    gc = (
+                        (window.count("G") + window.count("C"))
+                        / len(window)
+                    ) * 100
+
+                    positions.append(start + 1)
+                    gc_values.append(gc)
+
+                df = pd.DataFrame({
+                    "Starting Position": positions,
+                    "GC Content (%)": gc_values
+                })
+
+                fig = px.line(
+                    df,
+                    x="Starting Position",
+                    y="GC Content (%)",
+                    markers=True,
+                    title="GC Content Across DNA Regions"
+                )
+
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True
+                )
+
+                st.subheader("Region Analysis Results")
+
+                st.dataframe(
+                    df,
+                    use_container_width=True
+                )
+                st.subheader("📥 Download Analysis Reports")
+csv_data = df.to_csv(index=False)
+
+st.download_button(
+    "Download GC Analysis (CSV)",
+    data=csv_data,
+    file_name="geneweaver_gc_analysis.csv",
+    mime="text/csv"
+)
+
+fasta_data = f">{chromosome}_DNA_Sequence\n{dna}\n"
+
+st.download_button(
+    "Download DNA Sequence (FASTA)",
+    data=fasta_data,
+    file_name="geneweaver_sequence.fasta",
+    mime="text/plain"
+)
+
+st.subheader("DNA Sequence")
+
+st.code(dna)
