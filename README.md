@@ -55,3 +55,14 @@ the reliability and usability of the application.
 - Continued development of the GeneWeaver sequence validation component.
 ### DNA Sequence Alignment
 GeneWeaver allows users to compare two DNA sequences using global alignment.
+
+
+
+## Latest Project Update – 24 November 2026
+
+### Mutation Analysis and Chromosome Explorer
+
+- Added mutation analysis functionality to compare DNA sequences and identify differences.
+- Improved chromosome exploration features for visualizing chromosome information.
+- Updated the project documentation to describe the latest features.
+- Continued development and testing of the GeneWeaver application.
