@@ -66,3 +66,9 @@ GeneWeaver allows users to compare two DNA sequences using global alignment.
 - Improved chromosome exploration features for visualizing chromosome information.
 - Updated the project documentation to describe the latest features.
 - Continued development and testing of the GeneWeaver application.
+
+
+## Today's Progress
+- Updated project documentation.
+- Reviewed the existing project files.
+- Improved the README content.
