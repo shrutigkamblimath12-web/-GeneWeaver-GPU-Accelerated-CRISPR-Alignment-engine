@@ -62,62 +62,7 @@ if page == "Dashboard":
     - Chromosome exploration
     """)
 
-# DNA Sequence Analysis
-elif page == "DNA Sequence Analysis":
 
-    st.header("DNA Sequence Analysis")
-
-    sequence = st.text_area(
-        "Enter DNA Sequence",
-        placeholder="Example: ATGCGTACGTAGCTAG",
-        height=120
-    )
-
-    if st.button("Analyze DNA Sequence"):
-
-        dna = "".join(sequence.upper().split())
-
-        if not dna:
-            st.warning("Please enter a DNA sequence.")
-
-        elif any(base not in "ATGC" for base in dna):
-            st.error("Invalid DNA sequence. Use only A, T, G and C.")
-
-        else:
-            st.success("DNA sequence is valid!")
-
-            a = dna.count("A")
-            t = dna.count("T")
-            g = dna.count("G")
-            c = dna.count("C")
-
-            gc_content = ((g + c) / len(dna)) * 100
-
-            col1, col2, col3 = st.columns(3)
-
-            col1.metric("Sequence Length", len(dna))
-            col2.metric("GC Content", f"{gc_content:.2f}%")
-            col3.metric("AT Content", f"{100-gc_content:.2f}%")
-
-            st.subheader("Nucleotide Distribution")
-
-            df = pd.DataFrame({
-                "Nucleotide": ["A", "T", "G", "C"],
-                "Count": [a, t, g, c]
-            })
-
-            fig = px.bar(
-                df,
-                x="Nucleotide",
-                y="Count",
-                color="Nucleotide",
-                title="DNA Nucleotide Distribution"
-            )
-
-            st.plotly_chart(fig, use_container_width=True)
-
-            st.subheader("Sequence Preview")
-            st.code(dna)
 
 # Sequence Visualization
 elif page == "Sequence Visualization":
@@ -428,21 +373,17 @@ elif page == "Chromosome Explorer":
 csv_data = df.to_csv(index=False)
 
 st.download_button(
-    "Download GC Analysis (CSV)",
-    data=csv_data,
-    file_name="geneweaver_gc_analysis.csv",
-    mime="text/csv"
-)
+                    "Download GC Analysis (CSV)",
+                    data=csv_data,
+                    file_name="geneweaver_gc_analysis.csv",
+                    mime="text/csv"
+                )
 
 fasta_data = f">{chromosome}_DNA_Sequence\n{dna}\n"
 
 st.download_button(
-    "Download DNA Sequence (FASTA)",
-    data=fasta_data,
-    file_name="geneweaver_sequence.fasta",
-    mime="text/plain"
-)
-
-st.subheader("DNA Sequence")
-
-st.code(dna)
+                    "Download DNA Sequence (FASTA)",
+                    data=fasta_data,
+                    file_name="geneweaver_sequence.fasta",
+                    mime="text/plain"
+                )
